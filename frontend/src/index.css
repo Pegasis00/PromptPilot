@@ -1,0 +1,111 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --brand: #22c55e;
+    --brand-light: #4ade80;
+    --brand-muted: rgba(34, 197, 94, 0.12);
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-white text-surface-900 font-sans antialiased;
+    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+  }
+
+  body.dark {
+    @apply bg-surface-950 text-surface-50;
+  }
+
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-surface-200 dark:bg-surface-700 rounded-full;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-surface-300 dark:bg-surface-600;
+  }
+}
+
+@layer components {
+  .card {
+    @apply bg-white dark:bg-surface-900 border border-surface-100 dark:border-surface-800 rounded-2xl shadow-card;
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center gap-2 px-5 py-2.5 bg-brand-500 hover:bg-brand-600 text-white font-medium rounded-xl transition-all duration-200 shadow-glow-sm hover:shadow-glow disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none;
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center gap-2 px-4 py-2.5 bg-surface-50 dark:bg-surface-800 hover:bg-surface-100 dark:hover:bg-surface-700 text-surface-700 dark:text-surface-200 font-medium rounded-xl border border-surface-200 dark:border-surface-700 transition-all duration-200;
+  }
+
+  .btn-ghost {
+    @apply inline-flex items-center gap-2 px-3 py-2 text-surface-500 dark:text-surface-400 hover:text-surface-700 dark:hover:text-surface-200 hover:bg-surface-100 dark:hover:bg-surface-800 rounded-lg transition-all duration-150;
+  }
+
+  .input-base {
+    @apply w-full px-4 py-3 bg-surface-50 dark:bg-surface-800/60 border border-surface-200 dark:border-surface-700 rounded-xl text-surface-900 dark:text-surface-100 placeholder-surface-400 dark:placeholder-surface-500 focus:outline-none focus:ring-2 focus:ring-brand-400/40 focus:border-brand-400 dark:focus:border-brand-500 transition-all duration-200;
+  }
+
+  .badge {
+    @apply inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium;
+  }
+
+  .score-bar {
+    @apply h-1.5 rounded-full bg-surface-100 dark:bg-surface-800 overflow-hidden;
+  }
+
+  .score-fill {
+    @apply h-full rounded-full transition-all duration-700 ease-out;
+  }
+
+  .tab-active {
+    @apply bg-brand-500 text-white shadow-glow-sm;
+  }
+
+  .tab-inactive {
+    @apply text-surface-500 dark:text-surface-400 hover:text-surface-700 dark:hover:text-surface-200 hover:bg-surface-100 dark:hover:bg-surface-800;
+  }
+
+  .shimmer {
+    background: linear-gradient(90deg, transparent 25%, rgba(34,197,94,0.08) 50%, transparent 75%);
+    background-size: 200% 100%;
+    animation: shimmer 2s infinite linear;
+  }
+
+  .gradient-text {
+    @apply bg-gradient-to-r from-brand-500 to-brand-400 bg-clip-text text-transparent;
+  }
+}
+
+/* Custom textarea resize handle */
+textarea {
+  resize: vertical;
+}
+
+/* Smooth theme transitions */
+*, *::before, *::after {
+  transition-property: background-color, border-color, color;
+  transition-duration: 150ms;
+  transition-timing-function: ease;
+}
+
+/* Override transition for animated elements */
+.no-transition, .no-transition * {
+  transition: none !important;
+}
