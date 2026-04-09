@@ -61,6 +61,82 @@ def _stringify_prompt_value(value: object) -> str:
     return str(value).strip()
 
 
+def _strip_json_wrappers(content: str) -> str:
+    stripped = content.strip()
+    stripped = re.sub(r"^```(?:json)?\s*", "", stripped)
+    stripped = re.sub(r"\s*```$", "", stripped)
+
+    start = stripped.find("{")
+    end = stripped.rfind("}")
+    if start != -1 and end != -1 and end >= start:
+        return stripped[start:end + 1]
+
+    return stripped
+
+
+def _escape_control_chars_in_json(content: str) -> str:
+    escaped_chars: list[str] = []
+    in_string = False
+    is_escaped = False
+
+    for char in content:
+        if in_string:
+            if is_escaped:
+                escaped_chars.append(char)
+                is_escaped = False
+                continue
+
+            if char == "\\":
+                escaped_chars.append(char)
+                is_escaped = True
+                continue
+
+            if char == '"':
+                escaped_chars.append(char)
+                in_string = False
+                continue
+
+            if char == "\n":
+                escaped_chars.append("\\n")
+                continue
+
+            if char == "\r":
+                escaped_chars.append("\\r")
+                continue
+
+            if char == "\t":
+                escaped_chars.append("\\t")
+                continue
+
+            if ord(char) < 32:
+                escaped_chars.append(f"\\u{ord(char):04x}")
+                continue
+
+            escaped_chars.append(char)
+            continue
+
+        escaped_chars.append(char)
+        if char == '"':
+            in_string = True
+
+    return "".join(escaped_chars)
+
+
+def _load_json_payload(content: str) -> dict:
+    candidate = _strip_json_wrappers(content)
+
+    try:
+        parsed = json.loads(candidate)
+    except json.JSONDecodeError:
+        repaired = _escape_control_chars_in_json(candidate)
+        parsed = json.loads(repaired)
+
+    if not isinstance(parsed, dict):
+        raise ValueError("Model response did not decode to a JSON object")
+
+    return parsed
+
+
 def _coerce_score(value: object, default: int = 0) -> int:
     if isinstance(value, bool):
         return int(value)
@@ -207,12 +283,7 @@ Return this exact structure:
     )
 
     content = response.choices[0].message.content.strip()
-
-    # Strip markdown code fences if present
-    content = re.sub(r'^```(?:json)?\s*', '', content)
-    content = re.sub(r'\s*```$', '', content)
-
-    return _normalize_refine_response(json.loads(content))
+    return _normalize_refine_response(_load_json_payload(content))
 
 
 async def compress_prompt(prompt: str, target_reduction: int, target_model: str) -> str:
@@ -275,6 +346,4 @@ Respond with ONLY a valid JSON object:
     )
 
     content = response.choices[0].message.content.strip()
-    content = re.sub(r'^```(?:json)?\s*', '', content)
-    content = re.sub(r'\s*```$', '', content)
-    return _normalize_quality_analysis(json.loads(content))
+    return _normalize_quality_analysis(_load_json_payload(content))

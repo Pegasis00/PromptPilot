@@ -1,6 +1,10 @@
 import unittest
 
-from app.services.groq_service import _normalize_quality_analysis, _normalize_refine_response
+from app.services.groq_service import (
+    _load_json_payload,
+    _normalize_quality_analysis,
+    _normalize_refine_response,
+)
 
 
 class GroqServiceNormalizationTestCase(unittest.TestCase):
@@ -36,6 +40,28 @@ class GroqServiceNormalizationTestCase(unittest.TestCase):
         self.assertEqual(normalized["feedback"], "")
         self.assertEqual(normalized["strengths"], [])
         self.assertEqual(normalized["improvements"], [])
+
+    def test_load_json_payload_repairs_raw_newlines_inside_strings(self):
+        malformed = """
+        {
+          "refined_prompt": "Line one
+Line two",
+          "compressed_prompt": "Short",
+          "quality_analysis": {
+            "clarity": 90,
+            "structure": 88,
+            "specificity": 86,
+            "token_efficiency": 80,
+            "overall": 86,
+            "feedback": "Looks good"
+          }
+        }
+        """
+
+        parsed = _load_json_payload(malformed)
+
+        self.assertEqual(parsed["refined_prompt"], "Line one\nLine two")
+        self.assertEqual(parsed["compressed_prompt"], "Short")
 
 
 if __name__ == "__main__":
